@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Hybrid Training & Nutrition</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.json">
+  <style>
+    :root { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #f8fafc; --muted: #94a3b8; --accent: #38bdf8; --success: #22c55e; --warning: #f59e0b; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 75px; -webkit-tap-highlight-color: transparent; }
+    header { padding: 16px; background-color: var(--card); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
+    h1 { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+    .nav-item { flex: 1; text-align: center; font-size: 0.75rem; color: var(--muted); border: none; background: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0; cursor: pointer; }
+    .nav-item.active { color: var(--accent); font-weight: 600; }
+    .nav-item svg { width: 20px; height: 20px; fill: currentColor; }
+    .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+    .badge-blue { background: rgba(56, 189, 248, 0.15); color: var(--accent); }
+    .badge-green { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .badge-amber { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .timer-box { background: #0b1120; border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; margin: 12px 0; display: flex; align-items: center; justify-content: space-between; }
+    .timer-display { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .btn { background: var(--accent); color: #000; border: none; border-radius: 8px; padding: 10px 16px; font-weight: 600; cursor: pointer; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-block { width: 100%; display: block; padding: 14px; margin-top: 8px; }
+    .exercise-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
+    .exercise-item:last-child { border-bottom: none; }
+    .exercise-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .exercise-name { font-weight: 600; color: var(--accent); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; }
+    .set-row { display: grid; grid-template-columns: 45px 1fr 1fr 45px; gap: 8px; align-items: center; margin-bottom: 6px; }
+    input[type="number"], input[type="text"], select, textarea { background: #0b1120; border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 8px; width: 100%; font-size: 0.9rem; }
+    input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--success); cursor: pointer; }
+    .recipe-card { margin-bottom: 12px; border-left: 3px solid var(--accent); cursor: pointer; transition: transform 0.2s; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 200; padding: 20px; backdrop-filter: blur(4px); }
+    .modal-content { background: var(--card); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .modal-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--card); }
+    .modal-header h3 { font-size: 1rem; color: var(--accent); margin: 0; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 4px; }
+    .modal-body { padding: 16px; }
+    .modal-img { max-width: 100%; border-radius: 8px; height: auto; object-fit: contain; max-height: 350px; background: #fff; margin: 0 auto; display: block; }
+    .yt-btn { display: inline-block; margin-top: 12px; background: #ef4444; color: white; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; text-align: center; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1 id="header-title">Entrenamiento</h1>
+  <span id="current-date" style="font-size: 0.8rem; color: var(--muted);"></span>
+</header>
+
+<div class="container">
+  <section id="tab-train" class="tab-content active">
+    <div class="card">
+      <label style="font-size: 0.8rem; color: var(--muted);">Seleccionar rutina del día:</label>
+      <select id="routine-select" style="margin-top: 6px;" onchange="loadWorkout(this.value)">
+        <option value="lun">Lunes - CrossFit / Hyrox</option>
+        <option value="mar">Martes - Gym (Tren Superior)</option>
+        <option value="mie">Miércoles - Running (Zona 2)</option>
+        <option value="jue">Jueves - CrossFit / Hyrox</option>
+        <option value="vie">Viernes - Gym (Tren Inferior + Core)</option>
+        <option value="sab">Sábado - Opcional / Movilidad</option>
+        <option value="dom">Domingo - Descanso Total</option>
+      </select>
+    </div>
+
+    <div class="timer-box">
+      <div>
+        <div style="font-size: 0.7rem; color: var(--muted);">DESCANSO</div>
+        <div class="timer-display" id="timer">00:00</div>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <button class="btn btn-outline btn-sm" onclick="startTimer(60)">1m</button>
+        <button class="btn btn-outline btn-sm" onclick="startTimer(90)">1.5m</button>
+        <button class="btn btn-outline btn-sm" onclick="startTimer(120)">2m</button>
+        <button class="btn btn-outline btn-sm" onclick="resetTimer()">✕</button>
+      </div>
+    </div>
+
+    <div class="card" id="workout-container"></div>
+    <div class="card">
+      <label style="font-size: 0.8rem; color: var(--muted);">Notas de la sesión / RPE:</label>
+      <textarea id="session-notes" rows="2" placeholder="Ej: Ritmo cómodo..."></textarea>
+      <button class="btn btn-block" onclick="saveSession()">Guardar y Registrar Sesión</button>
+    </div>
+  </section>
+
+  <section id="tab-history" class="tab-content">
+    <div style="margin-bottom: 16px;"><input type="text" id="search-input" placeholder="Buscar..." oninput="renderHistory()"></div>
+    <div id="history-list"></div>
+  </section>
+
+  <section id="tab-nutrition" class="tab-content">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-weight: 600;">Día:</span>
+        <select id="nutrition-mode" style="width: auto; padding: 4px 8px;" onchange="renderNutrition(this.value)">
+          <option value="alto">Alto en Carbos (Box / Running)</option>
+          <option value="moderado">Moderado (Gym / Descanso)</option>
+        </select>
+      </div>
+      <div id="nutrition-target" style="font-size: 0.85rem; color: var(--muted);"></div>
+    </div>
+    <div id="meal-plans"></div>
+  </section>
+</div>
+
+<nav class="nav-bar">
+  <button class="nav-item active" onclick="switchTab('train')">
+    <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L7 5.57 15.57 14.14 12 17.71 13.43 19.14 14.86 17.71 17.71 20.57 19.14 19.14 20.57 20.57 22 19.14l-1.43-1.43z"/></svg>Entrenar
+  </button>
+  <button class="nav-item" onclick="switchTab('history')">
+    <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>Historial
+  </button>
+  <button class="nav-item" onclick="switchTab('nutrition')">
+    <svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>Nutrición
+  </button>
+</nav>
+
+<div class="modal-overlay" id="imageModal" onclick="if(event.target===this) closeModals()">
+  <div class="modal-content">
+    <div class="modal-header"><h3 id="modal-title">Ejercicio</h3><button class="modal-close" onclick="closeModals()">&times;</button></div>
+    <div class="modal-body" style="text-align: center;">
+      <img id="modal-img" class="modal-img" src="" alt="Cargando..." onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400'; document.getElementById('img-error').style.display='block';">
+      <div id="img-error" style="display:none; margin-top:12px;"><a id="yt-link" class="yt-btn" href="#" target="_blank">📺 Ver en YouTube</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="recipeModal" onclick="if(event.target===this) closeModals()">
+  <div class="modal-content">
+    <div class="modal-header"><h3 id="recipe-title">Receta</h3><button class="modal-close" onclick="closeModals()">&times;</button></div>
+    <div class="modal-body">
+      <h4 style="color: var(--accent); margin-bottom: 10px;">Ingredientes</h4>
+      <ul id="recipe-ingredients" style="margin-left: 20px; font-size: 0.85rem; color: var(--muted); margin-bottom: 20px;"></ul>
+      <h4 style="color: var(--accent); margin-bottom: 10px;">Preparación</h4>
+      <p id="recipe-prep" style="font-size: 0.85rem; line-height: 1.6;"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Registro del Service Worker para funcionamiento Offline
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        console.log('Service Worker registrado con éxito:', reg.scope);
+      }).catch(err => console.log('Error registrando Service Worker:', err));
+    });
+  }
+
+  const routines = {
+    lun: { title: "CrossFit / Hyrox", type: "box", exercises: [ { name: "WOD / Bloque Hyrox", sets: 1, target: "Anotar WOD" } ] },
+    mar: { title: "Gym: Tren Superior", type: "gym", exercises: [
+      { name: "Press de banca en rack", sets: 4, target: "8 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Bench-press-1.png", query: "como hacer press de banca barra" },
+      { name: "Jalón al pecho", sets: 4, target: "10 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Lat-pulldown-1.png", query: "como hacer jalon al pecho" },
+      { name: "Remo en máquina", sets: 3, target: "12 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Seated-row-1.png", query: "como hacer remo en maquina sentado" },
+      { name: "Aperturas máquina pecho", sets: 3, target: "12 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Dumbbell-flys-1.png", query: "aperturas pecho maquina" },
+      { name: "Press militar mancuernas", sets: 3, target: "10 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Dumbbell-shoulder-press-1.png", query: "press militar mancuernas sentado" }
+    ]},
+    mie: { title: "Running: Zona 2", type: "run", exercises: [ { name: "Carrera continua (8 - 12 km)", sets: 1, target: "Ritmo conversacional" } ] },
+    jue: { title: "CrossFit / Hyrox", type: "box", exercises: [ { name: "Sesión metabólica", sets: 1, target: "Priorizar técnica" } ] },
+    vie: { title: "Gym: Tren Inferior & Core", type: "gym", exercises: [
+      { name: "Sentadilla búlgara", sets: 4, target: "10 reps/pierna", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Lunges-1.png", query: "como hacer sentadilla bulgara multipower" },
+      { name: "Prensa de piernas", sets: 4, target: "12 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Leg_Press_Machine.jpg", query: "prensa de piernas tecnica" },
+      { name: "Extensiones cuádriceps", sets: 3, target: "15 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Leg-extensions-1.png", query: "extension de cuadriceps maquina" },
+      { name: "Aductores / Abductores", sets: 3, target: "15 reps", image: "https://images.unsplash.com/photo-1576678927484-cc907957088c?w=400", query: "maquina aductores y abductores" },
+      { name: "Rueda abdominal", sets: 4, target: "Al fallo", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Ab-roller-1.png", query: "como hacer rueda abdominal correctamente" }
+    ]},
+    sab: { title: "Sesión Opcional", type: "optional", exercises: [ { name: "Movilidad o 5km suaves", sets: 1, target: "Descanso activo" } ] },
+    dom: { title: "Descanso Total", type: "rest", exercises: [ { name: "Recuperación general", sets: 1, target: "Dormir e hidratar" } ] }
+  };
+
+  const nutritionData = {
+    alto: { calories: "2500 - 2550 kcal", macros: "Proteína: 145g | Carbohidratos: 340g | Grasas: 65g", meals: [
+      { name: "Desayuno: Porridge Energético", desc: "Avena cocida con proteína, cacahuete y frutos rojos.", ingredients: ["50g Copos de avena", "300ml Bebida de soja sin azúcar", "1 Scoop de proteína vegetal", "1 Plátano", "Arándanos/Fresas"], prep: "Calienta la bebida de soja junto con la avena. Añade el scoop de proteína y mezcla. Sirve con la crema, plátano y frutos rojos." },
+      { name: "Comida: Pasta con Boloñesa Vegetal", desc: "Carbohidratos complejos post-entreno.", ingredients: ["90g Pasta de lentejas rojas", "50g Soja texturizada fina", "Tomate triturado", "Orégano"], prep: "Hidrata la soja 10 min. Sofríe y añade tomate. Hierve la pasta y mezcla todo." },
+      { name: "Cena: Bowl de Quinoa y Tempeh", desc: "Reparación muscular nocturna.", ingredients: ["80g Quinoa cocida", "150g Tempeh", "Brócoli o calabacín", "AOVE"], prep: "Cuece la quinoa. Dora el tempeh en dados. Saltea la verdura y sirve en bowl." }
+    ]},
+    moderado: { calories: "2250 - 2350 kcal", macros: "Proteína: 145g | Carbohidratos: 250g | Grasas: 75g", meals: [
+      { name: "Desayuno: Revuelto de Tofu", desc: "Tostadas con revuelto vegetal simulando huevo.", ingredients: ["200g Tofu firme", "2 Rebanadas pan masa madre", "Levadura nutricional y Cúrcuma", "Sal negra"], prep: "Desmiga el tofu. Saltea con AOVE, cúrcuma y levadura. Añade sal negra al final para dar sabor a huevo. Sirve sobre pan." },
+      { name: "Comida: Ensalada Tibia", desc: "Proteína rápida.", ingredients: ["200g Garbanzos", "120g Heura o Seitán", "Espinacas", "Tomate cherry"], prep: "Lava los garbanzos. Dora la Heura. Mezcla con la base de espinacas y aliña." },
+      { name: "Cena: Hamburguesa y Espárragos", desc: "Cena baja en carbohidratos.", ingredients: ["1 Hamburguesa de lentejas", "Espárragos trigueros", "Champiñones"], prep: "Haz a la plancha la hamburguesa y las verduras. Sirve sin pan." }
+    ]}
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+    const currentDayKey = ['dom', 'lun', 'mar', 'mie', 'jue', 'vie', 'sab'][new Date().getDay()];
+    document.getElementById('routine-select').value = currentDayKey;
+    loadWorkout(currentDayKey); renderNutrition('alto'); renderHistory();
+  });
+
+  function loadWorkout(dayKey) {
+    const routine = routines[dayKey]; const container = document.getElementById('workout-container');
+    let html = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><h2>${routine.title}</h2><span class="badge badge-blue">${routine.type.toUpperCase()}</span></div>`;
+    routine.exercises.forEach(ex => {
+      const exNameHtml = ex.image ? `<span class="exercise-name" onclick="openExerciseModal('${ex.name}', '${ex.image}', '${ex.query}')">📷 ${ex.name}</span>` : `<strong>${ex.name}</strong>`;
+      html += `<div class="exercise-item" data-ex-name="${ex.name}"><div class="exercise-header">${exNameHtml}<span style="font-size: 0.8rem; color: var(--muted);">${ex.target || ''}</span></div>`;
+      if (routine.type === 'gym') {
+        html += `<div style="display: grid; grid-template-columns: 45px 1fr 1fr 45px; gap: 8px; font-size: 0.75rem; text-align: center;"><span>Serie</span><span>Kg</span><span>Reps</span><span>OK</span></div>`;
+        for (let i=1; i<=ex.sets; i++) html += `<div class="set-row"><span>#${i}</span><input type="number" placeholder="Kg" class="input-kg"><input type="number" placeholder="Reps" class="input-reps"><input type="checkbox" onchange="if(this.checked) startTimer(90)"></div>`;
+      } else html += `<textarea rows="2" placeholder="Detalles..." class="non-gym-notes"></textarea>`;
+      html += `</div>`;
+    }); container.innerHTML = html;
+  }
+
+  function renderNutrition(type) {
+    const data = nutritionData[type];
+    document.getElementById('nutrition-target').innerHTML = `<div><strong>Obj:</strong> ${data.calories}</div><div>${data.macros}</div>`;
+    document.getElementById('meal-plans').innerHTML = data.meals.map((m, i) => `<div class="card recipe-card" onclick="openRecipeModal('${type}', ${i})"><h3 style="font-size:0.95rem;">${m.name} ›</h3><p style="font-size:0.85rem; color:var(--muted);">${m.desc}</p></div>`).join('');
+  }
+
+  function openExerciseModal(title, imgSrc, query) {
+    document.getElementById('modal-title').textContent = title; document.getElementById('modal-img').src = imgSrc; document.getElementById('img-error').style.display = 'none';
+    document.getElementById('yt-link').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`; document.getElementById('imageModal').style.display = 'flex';
+  }
+  function openRecipeModal(type, i) {
+    const recipe = nutritionData[type].meals[i]; document.getElementById('recipe-title').textContent = recipe.name;
+    document.getElementById('recipe-ingredients').innerHTML = recipe.ingredients.map(ing => `<li>${ing}</li>`).join('');
+    document.getElementById('recipe-prep').textContent = recipe.prep; document.getElementById('recipeModal').style.display = 'flex';
+  }
+  function closeModals() { document.getElementById('imageModal').style.display = 'none'; document.getElementById('recipeModal').style.display = 'none'; }
+
+  function saveSession() {
+    let records = [];
+    document.querySelectorAll('.exercise-item').forEach(el => {
+      const name = el.getAttribute('data-ex-name'), kgInputs = el.querySelectorAll('.input-kg'), repsInputs = el.querySelectorAll('.input-reps');
+      if (kgInputs.length > 0) {
+        let setsData = []; kgInputs.forEach((inp, i) => { if (inp.value || repsInputs[i].value) setsData.push(`${inp.value||0}kg x ${repsInputs[i].value||0}`); });
+        if (setsData.length > 0) records.push({ exercise: name, data: setsData.join(' | ') });
+      } else { const note = el.querySelector('.non-gym-notes'); if (note && note.value) records.push({ exercise: name, data: note.value }); }
+    });
+    let history = JSON.parse(localStorage.getItem('hybrid_history') || '[]');
+    history.unshift({ id: Date.now(), displayDate: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }), title: routines[document.getElementById('routine-select').value].title, records: records, notes: document.getElementById('session-notes').value });
+    localStorage.setItem('hybrid_history', JSON.stringify(history)); alert('Guardado'); renderHistory();
+  }
+
+  function renderHistory() {
+    const q = (document.getElementById('search-input')?.value || '').toLowerCase();
+    let history = JSON.parse(localStorage.getItem('hybrid_history') || '[]').filter(i => i.title.toLowerCase().includes(q) || i.displayDate.includes(q) || i.records.some(r => r.exercise.toLowerCase().includes(q)));
+    document.getElementById('history-list').innerHTML = history.length ? history.map(s => `<div class="card"><div style="display:flex;justify-content:space-between;"><strong>${s.title}</strong><button onclick="if(confirm('¿Borrar?')){localStorage.setItem('hybrid_history', JSON.stringify(JSON.parse(localStorage.getItem('hybrid_history')).filter(i => i.id !== ${s.id}))); renderHistory();}" style="background:none;border:none;color:#ef4444;">✕</button></div><div style="font-size:0.75rem;color:var(--muted);">${s.displayDate}</div><div style="font-size:0.85rem;">${s.records.map(r => `<div><strong>${r.exercise}:</strong> <span style="color:var(--accent);">${r.data}</span></div>`).join('')}${s.notes ? `<div style="color:var(--muted); font-style:italic;">"${s.notes}"</div>` : ''}</div></div>`).join('') : '<div style="text-align:center;color:var(--muted);">Sin registros</div>';
+  }
+
+  let timerInterval;
+  function startTimer(sec) {
+    clearInterval(timerInterval); let rem = sec; const d = document.getElementById('timer'); d.style.color = 'var(--accent)';
+    timerInterval = setInterval(() => { d.textContent = `${Math.floor(rem/60).toString().padStart(2,'0')}:${(rem%60).toString().padStart(2,'0')}`; if(rem--<=0){clearInterval(timerInterval); d.style.color='var(--success)'; if(navigator.vibrate) navigator.vibrate([200,100,200]);} }, 1000);
+  }
+  function resetTimer() { clearInterval(timerInterval); document.getElementById('timer').textContent = "00:00"; document.getElementById('timer').style.color = 'var(--text)'; }
+  function switchTab(t) { document.querySelectorAll('.tab-content, .nav-item').forEach(e => e.classList.remove('active')); document.getElementById(`tab-${t}`).classList.add('active'); document.querySelectorAll('.nav-item')[['train','history','nutrition'].indexOf(t)].classList.add('active'); document.getElementById('header-title').textContent = {train:'Entrenamiento', history:'Historial', nutrition:'Nutrición'}[t]; }
+</script>
+</body>
+</html>
