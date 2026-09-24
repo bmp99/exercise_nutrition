@@ -1,0 +1,16 @@
+{
+  "name": "Hybrid Training & Nutrition",
+  "short_name": "HybridApp",
+  "description": "App de entrenamiento híbrido y nutrición basada en evidencia",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e293b",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2964/2964096.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
