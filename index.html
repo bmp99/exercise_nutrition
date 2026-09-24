@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Hybrid Training & Nutrition</title>
+  <title>Hybrid Training Pro</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="./manifest.json">
@@ -33,20 +33,25 @@
     .btn-block { width: 100%; display: block; padding: 14px; margin-top: 8px; }
     .exercise-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
     .exercise-item:last-child { border-bottom: none; }
-    .exercise-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .exercise-name { font-weight: 600; color: var(--accent); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; }
+    .exercise-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .exercise-name { font-weight: 600; color: var(--accent); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; display: block; }
+    .last-weight { font-size: 0.75rem; color: var(--success); margin-top: 4px; font-weight: 500; }
     .set-row { display: grid; grid-template-columns: 45px 1fr 1fr 45px; gap: 8px; align-items: center; margin-bottom: 6px; }
     input[type="number"], input[type="text"], select, textarea { background: #0b1120; border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 8px; width: 100%; font-size: 0.9rem; }
     input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--success); cursor: pointer; }
     .recipe-card { margin-bottom: 12px; border-left: 3px solid var(--accent); cursor: pointer; transition: transform 0.2s; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .macro-box { background: #0b1120; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+    .macro-box span { display: block; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+    .macro-box strong { font-size: 1.1rem; color: var(--text); }
+    
+    /* Modales */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 200; padding: 20px; backdrop-filter: blur(4px); }
     .modal-content { background: var(--card); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; }
     .modal-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--card); }
     .modal-header h3 { font-size: 1rem; color: var(--accent); margin: 0; }
     .modal-close { background: none; border: none; color: var(--muted); font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 4px; }
     .modal-body { padding: 16px; }
-    .modal-img { max-width: 100%; border-radius: 8px; height: auto; object-fit: contain; max-height: 350px; background: #fff; margin: 0 auto; display: block; }
-    .yt-btn { display: inline-block; margin-top: 12px; background: #ef4444; color: white; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; text-align: center; }
   </style>
 </head>
 <body>
@@ -57,25 +62,26 @@
 </header>
 
 <div class="container">
+  <!-- TAB 1: ENTRENAR -->
   <section id="tab-train" class="tab-content active">
-    <div class="card">
-      <label style="font-size: 0.8rem; color: var(--muted);">Seleccionar rutina del día:</label>
-      <select id="routine-select" style="margin-top: 6px;" onchange="loadWorkout(this.value)">
-        <option value="lun">Lunes - CrossFit / Hyrox</option>
-        <option value="mar">Martes - Gym (Tren Superior)</option>
-        <option value="mie">Miércoles - Running (Zona 2)</option>
-        <option value="jue">Jueves - CrossFit / Hyrox</option>
-        <option value="vie">Viernes - Gym (Tren Inferior + Core)</option>
-        <option value="sab">Sábado - Opcional / Movilidad</option>
-        <option value="dom">Domingo - Descanso Total</option>
-      </select>
+    <div class="card grid-2">
+      <div>
+        <label style="font-size: 0.75rem; color: var(--muted);">1. Modalidad</label>
+        <select id="modality-select" onchange="updateSubroutines()">
+          <option value="gym">Gymnasio</option>
+          <option value="crossfit">CrossFit</option>
+          <option value="hyrox">Hyrox</option>
+          <option value="run">Running</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size: 0.75rem; color: var(--muted);">2. Sesión</label>
+        <select id="routine-select" onchange="loadWorkout()"></select>
+      </div>
     </div>
 
     <div class="timer-box">
-      <div>
-        <div style="font-size: 0.7rem; color: var(--muted);">DESCANSO</div>
-        <div class="timer-display" id="timer">00:00</div>
-      </div>
+      <div><div style="font-size: 0.7rem; color: var(--muted);">DESCANSO</div><div class="timer-display" id="timer">00:00</div></div>
       <div style="display: flex; gap: 6px;">
         <button class="btn btn-outline btn-sm" onclick="startTimer(60)">1m</button>
         <button class="btn btn-outline btn-sm" onclick="startTimer(90)">1.5m</button>
@@ -85,58 +91,56 @@
     </div>
 
     <div class="card" id="workout-container"></div>
+    
     <div class="card">
       <label style="font-size: 0.8rem; color: var(--muted);">Notas de la sesión / RPE:</label>
-      <textarea id="session-notes" rows="2" placeholder="Ej: Ritmo cómodo..."></textarea>
-      <button class="btn btn-block" onclick="saveSession()">Guardar y Registrar Sesión</button>
+      <textarea id="session-notes" rows="2" placeholder="Sensaciones del entreno..."></textarea>
+      <button class="btn btn-block" onclick="saveSession()">Guardar Sesión</button>
     </div>
   </section>
 
+  <!-- TAB 2: HISTORIAL -->
   <section id="tab-history" class="tab-content">
-    <div style="margin-bottom: 16px;"><input type="text" id="search-input" placeholder="Buscar..." oninput="renderHistory()"></div>
+    <div style="margin-bottom: 16px;"><input type="text" id="search-input" placeholder="Buscar ejercicio, fecha..." oninput="renderHistory()"></div>
     <div id="history-list"></div>
   </section>
 
+  <!-- TAB 3: NUTRICIÓN -->
   <section id="tab-nutrition" class="tab-content">
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <span style="font-weight: 600;">Día:</span>
-        <select id="nutrition-mode" style="width: auto; padding: 4px 8px;" onchange="renderNutrition(this.value)">
-          <option value="alto">Alto en Carbos (Box / Running)</option>
-          <option value="moderado">Moderado (Gym / Descanso)</option>
-        </select>
+      <label style="font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; display:block;">Calculadora Dinámica (Kcal Objetivo):</label>
+      <input type="number" id="cal-target" value="2600" step="50" onchange="calculateMacros()" style="font-size: 1.2rem; font-weight: bold; color: var(--accent); text-align: center; margin-bottom: 16px;">
+      
+      <div class="grid-2">
+        <div class="macro-box"><span>Proteína (Fija)</span><strong id="macro-pro">150g</strong></div>
+        <div class="macro-box"><span>Grasas (25%)</span><strong id="macro-fat">72g</strong></div>
+        <div class="macro-box" style="grid-column: span 2;"><span>Carbohidratos (Resto)</span><strong id="macro-carb">338g</strong></div>
       </div>
-      <div id="nutrition-target" style="font-size: 0.85rem; color: var(--muted);"></div>
     </div>
-    <div id="meal-plans"></div>
+
+    <div class="card">
+      <h3 style="font-size: 1rem; margin-bottom: 12px; color: var(--accent);">Opciones de Menú</h3>
+      <select id="meal-type-select" onchange="renderMealList()" style="margin-bottom: 16px;">
+        <option value="desayunos">Desayunos y Almuerzos</option>
+        <option value="comidas">Comidas (Post-Entreno)</option>
+        <option value="cenas">Cenas (Reparación)</option>
+      </select>
+      <div id="meal-catalog"></div>
+    </div>
   </section>
 </div>
 
+<!-- NAV BAR -->
 <nav class="nav-bar">
-  <button class="nav-item active" onclick="switchTab('train')">
-    <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L7 5.57 15.57 14.14 12 17.71 13.43 19.14 14.86 17.71 17.71 20.57 19.14 19.14 20.57 20.57 22 19.14l-1.43-1.43z"/></svg>Entrenar
-  </button>
-  <button class="nav-item" onclick="switchTab('history')">
-    <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>Historial
-  </button>
-  <button class="nav-item" onclick="switchTab('nutrition')">
-    <svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>Nutrición
-  </button>
+  <button class="nav-item active" onclick="switchTab('train')"><svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L7 5.57 15.57 14.14 12 17.71 13.43 19.14 14.86 17.71 17.71 20.57 19.14 19.14 20.57 20.57 22 19.14l-1.43-1.43z"/></svg>Entrenar</button>
+  <button class="nav-item" onclick="switchTab('history')"><svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>Historial</button>
+  <button class="nav-item" onclick="switchTab('nutrition')"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>Nutrición</button>
 </nav>
 
-<div class="modal-overlay" id="imageModal" onclick="if(event.target===this) closeModals()">
+<!-- MODALES -->
+<div class="modal-overlay" id="recipeModal" onclick="if(event.target===this) this.style.display='none'">
   <div class="modal-content">
-    <div class="modal-header"><h3 id="modal-title">Ejercicio</h3><button class="modal-close" onclick="closeModals()">&times;</button></div>
-    <div class="modal-body" style="text-align: center;">
-      <img id="modal-img" class="modal-img" src="" alt="Cargando..." onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400'; document.getElementById('img-error').style.display='block';">
-      <div id="img-error" style="display:none; margin-top:12px;"><a id="yt-link" class="yt-btn" href="#" target="_blank">📺 Ver en YouTube</a></div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="recipeModal" onclick="if(event.target===this) closeModals()">
-  <div class="modal-content">
-    <div class="modal-header"><h3 id="recipe-title">Receta</h3><button class="modal-close" onclick="closeModals()">&times;</button></div>
+    <div class="modal-header"><h3 id="recipe-title">Receta</h3><button class="modal-close" onclick="document.getElementById('recipeModal').style.display='none'">&times;</button></div>
     <div class="modal-body">
       <h4 style="color: var(--accent); margin-bottom: 10px;">Ingredientes</h4>
       <ul id="recipe-ingredients" style="margin-left: 20px; font-size: 0.85rem; color: var(--muted); margin-bottom: 20px;"></ul>
@@ -147,108 +151,184 @@
 </div>
 
 <script>
-  // Registro del Service Worker para funcionamiento Offline
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').then(reg => {
-        console.log('Service Worker registrado con éxito:', reg.scope);
-      }).catch(err => console.log('Error registrando Service Worker:', err));
-    });
-  }
-
-  const routines = {
-    lun: { title: "CrossFit / Hyrox", type: "box", exercises: [ { name: "WOD / Bloque Hyrox", sets: 1, target: "Anotar WOD" } ] },
-    mar: { title: "Gym: Tren Superior", type: "gym", exercises: [
-      { name: "Press de banca en rack", sets: 4, target: "8 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Bench-press-1.png", query: "como hacer press de banca barra" },
-      { name: "Jalón al pecho", sets: 4, target: "10 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Lat-pulldown-1.png", query: "como hacer jalon al pecho" },
-      { name: "Remo en máquina", sets: 3, target: "12 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Seated-row-1.png", query: "como hacer remo en maquina sentado" },
-      { name: "Aperturas máquina pecho", sets: 3, target: "12 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Dumbbell-flys-1.png", query: "aperturas pecho maquina" },
-      { name: "Press militar mancuernas", sets: 3, target: "10 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Dumbbell-shoulder-press-1.png", query: "press militar mancuernas sentado" }
-    ]},
-    mie: { title: "Running: Zona 2", type: "run", exercises: [ { name: "Carrera continua (8 - 12 km)", sets: 1, target: "Ritmo conversacional" } ] },
-    jue: { title: "CrossFit / Hyrox", type: "box", exercises: [ { name: "Sesión metabólica", sets: 1, target: "Priorizar técnica" } ] },
-    vie: { title: "Gym: Tren Inferior & Core", type: "gym", exercises: [
-      { name: "Sentadilla búlgara", sets: 4, target: "10 reps/pierna", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Lunges-1.png", query: "como hacer sentadilla bulgara multipower" },
-      { name: "Prensa de piernas", sets: 4, target: "12 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Leg_Press_Machine.jpg", query: "prensa de piernas tecnica" },
-      { name: "Extensiones cuádriceps", sets: 3, target: "15 reps", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Leg-extensions-1.png", query: "extension de cuadriceps maquina" },
-      { name: "Aductores / Abductores", sets: 3, target: "15 reps", image: "https://images.unsplash.com/photo-1576678927484-cc907957088c?w=400", query: "maquina aductores y abductores" },
-      { name: "Rueda abdominal", sets: 4, target: "Al fallo", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Ab-roller-1.png", query: "como hacer rueda abdominal correctamente" }
-    ]},
-    sab: { title: "Sesión Opcional", type: "optional", exercises: [ { name: "Movilidad o 5km suaves", sets: 1, target: "Descanso activo" } ] },
-    dom: { title: "Descanso Total", type: "rest", exercises: [ { name: "Recuperación general", sets: 1, target: "Dormir e hidratar" } ] }
+  // ESTRUCTURA DE DATOS DB_ROUTINES
+  const dbRoutines = {
+    gym: {
+      upper: { title: "Tren Superior", exercises: [{name: "Press de banca en rack", sets: 4}, {name: "Jalón al pecho", sets: 4}, {name: "Press militar mancuernas", sets: 3}, {name: "Remo en máquina", sets: 3}, {name: "Aperturas pecho", sets: 3}] },
+      lower: { title: "Tren Inferior & Core", exercises: [{name: "Sentadilla búlgara", sets: 4}, {name: "Prensa de piernas", sets: 4}, {name: "Extensiones cuádriceps", sets: 3}, {name: "Aductores / Abductores", sets: 3}, {name: "Rueda abdominal", sets: 4}] },
+      full: { title: "Full Body Básico", exercises: [{name: "Prensa de piernas", sets: 4}, {name: "Press de banca en rack", sets: 4}, {name: "Jalón al pecho", sets: 4}, {name: "Rueda abdominal", sets: 3}] }
+    },
+    crossfit: {
+      wod: { title: "WOD del día", exercises: [{name: "Acondicionamiento Metabólico", sets: 1, type: "text"}] },
+      fuerza_wod: { title: "Fuerza + WOD", exercises: [{name: "Levantamiento Técnico", sets: 4}, {name: "WOD Corto", sets: 1, type: "text"}] }
+    },
+    hyrox: {
+      sim: { title: "Simulación Hyrox", exercises: [{name: "Run + Ergómetros + Trineo", sets: 1, type: "text"}] }
+    },
+    run: {
+      zona2: { title: "Fondo Zona 2", exercises: [{name: "Carrera Continua", sets: 1, type: "text"}] },
+      series: { title: "Series / Intervalos", exercises: [{name: "Bloques de Velocidad", sets: 1, type: "text"}] }
+    }
   };
 
-  const nutritionData = {
-    alto: { calories: "2500 - 2550 kcal", macros: "Proteína: 145g | Carbohidratos: 340g | Grasas: 65g", meals: [
-      { name: "Desayuno: Porridge Energético", desc: "Avena cocida con proteína, cacahuete y frutos rojos.", ingredients: ["50g Copos de avena", "300ml Bebida de soja sin azúcar", "1 Scoop de proteína vegetal", "1 Plátano", "Arándanos/Fresas"], prep: "Calienta la bebida de soja junto con la avena. Añade el scoop de proteína y mezcla. Sirve con la crema, plátano y frutos rojos." },
-      { name: "Comida: Pasta con Boloñesa Vegetal", desc: "Carbohidratos complejos post-entreno.", ingredients: ["90g Pasta de lentejas rojas", "50g Soja texturizada fina", "Tomate triturado", "Orégano"], prep: "Hidrata la soja 10 min. Sofríe y añade tomate. Hierve la pasta y mezcla todo." },
-      { name: "Cena: Bowl de Quinoa y Tempeh", desc: "Reparación muscular nocturna.", ingredients: ["80g Quinoa cocida", "150g Tempeh", "Brócoli o calabacín", "AOVE"], prep: "Cuece la quinoa. Dora el tempeh en dados. Saltea la verdura y sirve en bowl." }
-    ]},
-    moderado: { calories: "2250 - 2350 kcal", macros: "Proteína: 145g | Carbohidratos: 250g | Grasas: 75g", meals: [
-      { name: "Desayuno: Revuelto de Tofu", desc: "Tostadas con revuelto vegetal simulando huevo.", ingredients: ["200g Tofu firme", "2 Rebanadas pan masa madre", "Levadura nutricional y Cúrcuma", "Sal negra"], prep: "Desmiga el tofu. Saltea con AOVE, cúrcuma y levadura. Añade sal negra al final para dar sabor a huevo. Sirve sobre pan." },
-      { name: "Comida: Ensalada Tibia", desc: "Proteína rápida.", ingredients: ["200g Garbanzos", "120g Heura o Seitán", "Espinacas", "Tomate cherry"], prep: "Lava los garbanzos. Dora la Heura. Mezcla con la base de espinacas y aliña." },
-      { name: "Cena: Hamburguesa y Espárragos", desc: "Cena baja en carbohidratos.", ingredients: ["1 Hamburguesa de lentejas", "Espárragos trigueros", "Champiñones"], prep: "Haz a la plancha la hamburguesa y las verduras. Sirve sin pan." }
-    ]}
+  // ESTRUCTURA DE DATOS DB_NUTRITION
+  const dbNutrition = {
+    desayunos: [
+      { name: "Porridge Energético Proteico", desc: "Avena con proteína y frutos rojos.", ingredients: ["50g Copos de avena", "Bebida de soja sin azúcar", "1 Scoop proteína vegetal", "Crema de cacahuete", "Plátano/Frutos rojos"], prep: "Calienta la avena con la bebida. Mezcla el scoop de proteína hasta espesar. Corona con los toppings." },
+      { name: "Revuelto de Tofu en Tostadas", desc: "Simulación de huevo 100% vegetal.", ingredients: ["200g Tofu firme", "Pan de masa madre", "Levadura nutricional, cúrcuma, sal negra", "Espinacas"], prep: "Desmiga el tofu y saltea con cúrcuma y levadura. Añade sal negra al apagar el fuego. Sirve sobre tostadas." }
+    ],
+    comidas: [
+      { name: "Pasta de Lentejas a la Boloñesa", desc: "Alto en proteína para post-entreno.", ingredients: ["90g Pasta de lentejas", "50g Soja texturizada", "Tomate triturado natural", "Orégano y ajo"], prep: "Hidrata la soja. Sofríe y añade tomate para reducir. Cuece la pasta y mezcla todo." },
+      { name: "Ensalada Tibia de Garbanzos y Heura", desc: "Legumbres rápidas.", ingredients: ["200g Garbanzos de bote", "120g Heura/Seitán", "Espinacas frescas", "AOVE y vinagre"], prep: "Lava garbanzos. Dora la Heura. Mezcla sobre base de espinacas y aliña." }
+    ],
+    cenas: [
+      { name: "Bowl Reparador de Quinoa y Tempeh", desc: "Carbohidrato moderado nocturno.", ingredients: ["80g Quinoa", "150g Tempeh marinado", "Brócoli o calabacín", "Salsa de soja"], prep: "Cuece la quinoa. Corta y saltea el tempeh y la verdura. Mezcla en un bowl." },
+      { name: "Hamburguesa Vegetal y Espárragos", desc: "Cena ligera sin pan.", ingredients: ["1 Hamburguesa de legumbre (alubia/lenteja)", "Espárragos trigueros", "Champiñones"], prep: "Cocina a la plancha la hamburguesa y las verduras. Sirve directamente." }
+    ]
   };
 
+  // INICIALIZACIÓN
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-    const currentDayKey = ['dom', 'lun', 'mar', 'mie', 'jue', 'vie', 'sab'][new Date().getDay()];
-    document.getElementById('routine-select').value = currentDayKey;
-    loadWorkout(currentDayKey); renderNutrition('alto'); renderHistory();
+    updateSubroutines();
+    calculateMacros();
+    renderMealList();
+    renderHistory();
   });
 
-  function loadWorkout(dayKey) {
-    const routine = routines[dayKey]; const container = document.getElementById('workout-container');
-    let html = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><h2>${routine.title}</h2><span class="badge badge-blue">${routine.type.toUpperCase()}</span></div>`;
+  // LÓGICA DE ENTRENAMIENTO (BÚSQUEDA DE PESOS INCLUIDA)
+  function updateSubroutines() {
+    const mod = document.getElementById('modality-select').value;
+    const subSelect = document.getElementById('routine-select');
+    subSelect.innerHTML = Object.keys(dbRoutines[mod]).map(key => `<option value="${key}">${dbRoutines[mod][key].title}</option>`).join('');
+    loadWorkout();
+  }
+
+  function getLastWeight(exName) {
+    const hist = JSON.parse(localStorage.getItem('hybrid_history') || '[]');
+    for (let s of hist) {
+      if(s.records) {
+        const r = s.records.find(x => x.exercise === exName);
+        if(r) return r.data;
+      }
+    }
+    return "Sin registro previo";
+  }
+
+  function loadWorkout() {
+    const mod = document.getElementById('modality-select').value;
+    const sub = document.getElementById('routine-select').value;
+    const routine = dbRoutines[mod][sub];
+    const container = document.getElementById('workout-container');
+    
+    let html = `<div style="margin-bottom: 12px;"><h2 style="font-size: 1rem;">${routine.title}</h2></div>`;
+    
     routine.exercises.forEach(ex => {
-      const exNameHtml = ex.image ? `<span class="exercise-name" onclick="openExerciseModal('${ex.name}', '${ex.image}', '${ex.query}')">📷 ${ex.name}</span>` : `<strong>${ex.name}</strong>`;
-      html += `<div class="exercise-item" data-ex-name="${ex.name}"><div class="exercise-header">${exNameHtml}<span style="font-size: 0.8rem; color: var(--muted);">${ex.target || ''}</span></div>`;
-      if (routine.type === 'gym') {
+      const lastW = getLastWeight(ex.name);
+      html += `<div class="exercise-item" data-ex-name="${ex.name}">
+        <div class="exercise-header">
+          <div><span class="exercise-name">${ex.name}</span><div class="last-weight">Última vez: ${lastW}</div></div>
+        </div>`;
+      
+      if (ex.type === "text") {
+        html += `<textarea rows="2" placeholder="Tiempo, rondas o detalles..." class="non-gym-notes"></textarea>`;
+      } else {
         html += `<div style="display: grid; grid-template-columns: 45px 1fr 1fr 45px; gap: 8px; font-size: 0.75rem; text-align: center;"><span>Serie</span><span>Kg</span><span>Reps</span><span>OK</span></div>`;
-        for (let i=1; i<=ex.sets; i++) html += `<div class="set-row"><span>#${i}</span><input type="number" placeholder="Kg" class="input-kg"><input type="number" placeholder="Reps" class="input-reps"><input type="checkbox" onchange="if(this.checked) startTimer(90)"></div>`;
-      } else html += `<textarea rows="2" placeholder="Detalles..." class="non-gym-notes"></textarea>`;
+        for (let i=1; i<=ex.sets; i++) {
+          html += `<div class="set-row"><span>#${i}</span><input type="number" placeholder="Kg" class="input-kg"><input type="number" placeholder="Reps" class="input-reps"><input type="checkbox" onchange="if(this.checked) startTimer(90)"></div>`;
+        }
+      }
       html += `</div>`;
-    }); container.innerHTML = html;
+    });
+    container.innerHTML = html;
   }
 
-  function renderNutrition(type) {
-    const data = nutritionData[type];
-    document.getElementById('nutrition-target').innerHTML = `<div><strong>Obj:</strong> ${data.calories}</div><div>${data.macros}</div>`;
-    document.getElementById('meal-plans').innerHTML = data.meals.map((m, i) => `<div class="card recipe-card" onclick="openRecipeModal('${type}', ${i})"><h3 style="font-size:0.95rem;">${m.name} ›</h3><p style="font-size:0.85rem; color:var(--muted);">${m.desc}</p></div>`).join('');
+  // LÓGICA DE NUTRICIÓN DINÁMICA
+  function calculateMacros() {
+    const cals = parseInt(document.getElementById('cal-target').value);
+    const pro = 150; // Constante basada en ~75kg
+    const fat = Math.round((cals * 0.25) / 9);
+    const carbs = Math.round((cals - (pro * 4) - (fat * 9)) / 4);
+    
+    document.getElementById('macro-pro').textContent = `${pro}g`;
+    document.getElementById('macro-fat').textContent = `${fat}g`;
+    document.getElementById('macro-carb').textContent = `${carbs}g`;
   }
 
-  function openExerciseModal(title, imgSrc, query) {
-    document.getElementById('modal-title').textContent = title; document.getElementById('modal-img').src = imgSrc; document.getElementById('img-error').style.display = 'none';
-    document.getElementById('yt-link').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`; document.getElementById('imageModal').style.display = 'flex';
+  function renderMealList() {
+    const type = document.getElementById('meal-type-select').value;
+    const meals = dbNutrition[type];
+    
+    document.getElementById('meal-catalog').innerHTML = meals.map((m, i) => `
+      <div class="card recipe-card" onclick="openRecipeModal('${type}', ${i})">
+        <h3 style="font-size:0.95rem;">${m.name} ›</h3>
+        <p style="font-size:0.85rem; color:var(--muted);">${m.desc}</p>
+      </div>
+    `).join('');
   }
+
   function openRecipeModal(type, i) {
-    const recipe = nutritionData[type].meals[i]; document.getElementById('recipe-title').textContent = recipe.name;
+    const recipe = dbNutrition[type][i];
+    document.getElementById('recipe-title').textContent = recipe.name;
     document.getElementById('recipe-ingredients').innerHTML = recipe.ingredients.map(ing => `<li>${ing}</li>`).join('');
-    document.getElementById('recipe-prep').textContent = recipe.prep; document.getElementById('recipeModal').style.display = 'flex';
+    document.getElementById('recipe-prep').textContent = recipe.prep;
+    document.getElementById('recipeModal').style.display = 'flex';
   }
-  function closeModals() { document.getElementById('imageModal').style.display = 'none'; document.getElementById('recipeModal').style.display = 'none'; }
 
+  // GUARDADO E HISTORIAL
   function saveSession() {
     let records = [];
     document.querySelectorAll('.exercise-item').forEach(el => {
       const name = el.getAttribute('data-ex-name'), kgInputs = el.querySelectorAll('.input-kg'), repsInputs = el.querySelectorAll('.input-reps');
       if (kgInputs.length > 0) {
-        let setsData = []; kgInputs.forEach((inp, i) => { if (inp.value || repsInputs[i].value) setsData.push(`${inp.value||0}kg x ${repsInputs[i].value||0}`); });
+        let setsData = []; 
+        kgInputs.forEach((inp, i) => { if (inp.value || repsInputs[i].value) setsData.push(`${inp.value||0}kg x ${repsInputs[i].value||0}`); });
         if (setsData.length > 0) records.push({ exercise: name, data: setsData.join(' | ') });
-      } else { const note = el.querySelector('.non-gym-notes'); if (note && note.value) records.push({ exercise: name, data: note.value }); }
+      } else { 
+        const note = el.querySelector('.non-gym-notes'); 
+        if (note && note.value) records.push({ exercise: name, data: note.value }); 
+      }
     });
+    
+    if(records.length === 0 && !document.getElementById('session-notes').value) return alert("Rellena algún dato antes de guardar.");
+    
+    const mod = document.getElementById('modality-select').value;
+    const sub = document.getElementById('routine-select').value;
+    
     let history = JSON.parse(localStorage.getItem('hybrid_history') || '[]');
-    history.unshift({ id: Date.now(), displayDate: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }), title: routines[document.getElementById('routine-select').value].title, records: records, notes: document.getElementById('session-notes').value });
-    localStorage.setItem('hybrid_history', JSON.stringify(history)); alert('Guardado'); renderHistory();
+    history.unshift({ 
+      id: Date.now(), 
+      displayDate: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }), 
+      title: dbRoutines[mod][sub].title, 
+      records: records, 
+      notes: document.getElementById('session-notes').value 
+    });
+    localStorage.setItem('hybrid_history', JSON.stringify(history)); 
+    alert('Sesión registrada en el historial.'); 
+    document.getElementById('session-notes').value = ''; 
+    loadWorkout(); // Resetea inputs
+    renderHistory();
   }
 
   function renderHistory() {
     const q = (document.getElementById('search-input')?.value || '').toLowerCase();
     let history = JSON.parse(localStorage.getItem('hybrid_history') || '[]').filter(i => i.title.toLowerCase().includes(q) || i.displayDate.includes(q) || i.records.some(r => r.exercise.toLowerCase().includes(q)));
-    document.getElementById('history-list').innerHTML = history.length ? history.map(s => `<div class="card"><div style="display:flex;justify-content:space-between;"><strong>${s.title}</strong><button onclick="if(confirm('¿Borrar?')){localStorage.setItem('hybrid_history', JSON.stringify(JSON.parse(localStorage.getItem('hybrid_history')).filter(i => i.id !== ${s.id}))); renderHistory();}" style="background:none;border:none;color:#ef4444;">✕</button></div><div style="font-size:0.75rem;color:var(--muted);">${s.displayDate}</div><div style="font-size:0.85rem;">${s.records.map(r => `<div><strong>${r.exercise}:</strong> <span style="color:var(--accent);">${r.data}</span></div>`).join('')}${s.notes ? `<div style="color:var(--muted); font-style:italic;">"${s.notes}"</div>` : ''}</div></div>`).join('') : '<div style="text-align:center;color:var(--muted);">Sin registros</div>';
+    
+    document.getElementById('history-list').innerHTML = history.length ? history.map(s => `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;">
+          <strong>${s.title}</strong>
+          <button onclick="if(confirm('¿Borrar?')){localStorage.setItem('hybrid_history', JSON.stringify(JSON.parse(localStorage.getItem('hybrid_history')).filter(i => i.id !== ${s.id}))); renderHistory();}" style="background:none;border:none;color:#ef4444;">✕</button>
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted);">${s.displayDate}</div>
+        <div style="font-size:0.85rem; margin-top:8px;">
+          ${s.records.map(r => `<div><strong>${r.exercise}:</strong> <span style="color:var(--accent);">${r.data}</span></div>`).join('')}
+          ${s.notes ? `<div style="color:var(--muted); font-style:italic; margin-top:6px;">"${s.notes}"</div>` : ''}
+        </div>
+      </div>`).join('') : '<div style="text-align:center;color:var(--muted);">Sin registros</div>';
   }
 
+  // UTILIDADES (Temporizador y Pestañas)
   let timerInterval;
   function startTimer(sec) {
     clearInterval(timerInterval); let rem = sec; const d = document.getElementById('timer'); d.style.color = 'var(--accent)';
